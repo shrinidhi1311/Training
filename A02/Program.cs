@@ -1,36 +1,30 @@
 ﻿using System;
-
 class Program {
    static void Main () {
-      int n = new Random ().Next (1, 101);
-      int attempts = 1;
-
-      Console.WriteLine ("Guess a number from 1 to 100:");
+      int n = new Random ().Next (1, 101), attempts = 1;
+      print ("Guess a number from 1 to 100:");
       int guess = int.Parse (Console.ReadLine ());
-
       while (guess != n) {
          if (guess < n) {
-            Console.WriteLine ("Too low! Try again.");
+            print ("Too low! Try again.");
          } else {
-            Console.WriteLine ("Too high! try again.");
+            print ("Too high! Try again.");
          }
-
-         if (attempts >= 7) {
-            Console.WriteLine ("Too many attempts!");
-            Console.WriteLine ($"The correct number was {n}.");
-            Console.WriteLine ("Press any key to exit...");
-            Console.ReadKey ();
-            return;
-         }
-
-         Console.WriteLine ("Guess a number:");
+         print ("Guess again:");
          guess = int.Parse (Console.ReadLine ());
          attempts++;
       }
-
-      Console.WriteLine ("Congrats! You guessed the number correctly!");
-      Console.WriteLine ($"You guessed it in {attempts} attempt(s).");
-      Console.WriteLine ("Press any key to exit...");
+      if (guess == n) {
+         print ("Congrats on guessing the correct number!");
+         print ($"Total attempts taken : {attempts}");
+      } else {
+         print ("Too many attempts!");
+         print ($"The correct number was {n}");
+      }
+      print ("press any key to exit.");
       Console.ReadKey ();
+   }
+   static void print (string display) {
+      Console.WriteLine (display);
    }
 }
