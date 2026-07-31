@@ -1,13 +1,12 @@
 ﻿using static System.Console;
 class Program {
    static void Main () {
-      int randomNumber = new Random ().Next (1, 101), attempts = 1, guess;
+      int n = new Random ().Next (1, 101), attempts = 1, guess;
       Print ("Guess a number from 1 to 100:");
       guess = ReadGuess ();
-      while (guess != randomNumber) {
-         if (guess < randomNumber) Print ("Too low! Try again.");
-         else Print ("Too high! Try again.");
-         Print ("Guess again:");
+      while (guess != n) {
+         Print ($"Too {(guess < n ? "low" : "high")}! Try again.");
+         Print ("Guess the number:");
          guess = ReadGuess ();
          attempts++;
       }
@@ -22,7 +21,5 @@ class Program {
       return guess;
    }
 
-   static void Print (string message) {
-      WriteLine (message);
-   }
+   static void Print (string message) => WriteLine (message);
 }
