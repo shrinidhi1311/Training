@@ -8,15 +8,14 @@ using static System.Console;
 class Program {
    static void Main () {
       int n = new Random ().Next (1, 101), attempts = 1, guess;
+      const int MAX_ATTEMPTS = 7;
       string message = "Guess a number from 1 to 100:";
       Print (message);
-      while (attempts <= 7) {
-         guess = ReadGuess ();
-         if (guess == n) {
-            message = $"You guessed it!\nAttempts: {attempts}\nPress any key...";
-            break;
-         } else if (attempts == 7) {
-            message = $"No attempts left!\nCorrect Number: {n}\nPress any key...";
+      while (attempts <= MAX_ATTEMPTS && ReadGuess (out guess)) {
+         if (guess == n || attempts == MAX_ATTEMPTS) {
+            message = (guess == n)
+               ? $"You guessed it!\nAttempts: {attempts}\nPress any key..."
+               : $"No attempts left!\nCorrect Number: {n}\nPress any key...";
             break;
          }
          Print ($"Too {(guess < n ? "low" : "high")}! Try again.\nGuess again:");
@@ -25,12 +24,11 @@ class Program {
       Print (message);
       ReadKey ();
    }
-
-   static int ReadGuess () {
-      int guess;
+   /// <summary>Reads and validates the user's guess.</summary>
+   static bool ReadGuess (out int guess) {
       while (!int.TryParse (ReadLine (), out guess) || guess < 1 || guess > 100) Print ("Invalid input.Try again:");
-      return guess;
+      return true;
    }
-
+   /// <summary>Displays a message on the console.</summary>
    static void Print (string text) => WriteLine (text);
 }
