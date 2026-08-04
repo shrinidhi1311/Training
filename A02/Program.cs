@@ -12,9 +12,9 @@ class Program {
       string message = "Guess a number from 1 to 100:";
       Print (message);
       while (attempts <= MAX_ATTEMPTS && ReadGuess (out guess)) {
-         if (guess == n || attempts == MAX_ATTEMPTS) {
-            message = (guess == n)
-               ? $"You guessed it!\nAttempts: {attempts}\nPress any key..."
+         bool won = guess == n, lastAttempt = attempts == MAX_ATTEMPTS;
+         if (won || lastAttempt) {
+            message = won ? $"You guessed it!\nAttempts: {attempts}\nPress any key..."
                : $"No attempts left!\nCorrect Number: {n}\nPress any key...";
             break;
          }
@@ -24,11 +24,13 @@ class Program {
       Print (message);
       ReadKey ();
    }
-   /// <summary>Reads and validates the user's guess.</summary>
+
+   // Reads and validates the user's guess.
    static bool ReadGuess (out int guess) {
       while (!int.TryParse (ReadLine (), out guess) || guess < 1 || guess > 100) Print ("Invalid input.Try again:");
       return true;
    }
-   /// <summary>Displays a message on the console.</summary>
+
+   // Displays a message on the console.
    static void Print (string text) => WriteLine (text);
 }
