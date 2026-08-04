@@ -5,6 +5,7 @@
 // Program.cs
 // Program to implement a number guessing game with input validation and a maximum of seven attempts.
 using static System.Console;
+
 class Program {
    static void Main () {
       int n = new Random ().Next (1, 101), attempts = 1, guess;
@@ -17,9 +18,9 @@ class Program {
          message = won ? $"You guessed it!\nAttempts: {attempts}\nPress any key..."
                        : lastAttempt ? $"No attempts left!\nCorrect Number: {n}\nPress any key..."
                                      : $"Too {(guess < n ? "low" : "high")}! Try again.\nGuess again:";
+         attempts++;
          Print (message);
          if (won || lastAttempt) break;
-         attempts++;
       }
       ReadKey ();
    }
@@ -31,5 +32,5 @@ class Program {
    }
 
    // Displays a message on the console
-   static void Print (string text) => WriteLine (text);
+   static void Print (string message) => WriteLine (message);
 }
