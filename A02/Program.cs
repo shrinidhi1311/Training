@@ -13,11 +13,10 @@ class Program {
       string message = "Guess a number from 1 to 100:";
       Print (message);
       while (ReadGuess (out guess)) {
-         won = guess == n;
-         lastAttempt = attempts == MAX_ATTEMPTS;
+         won = guess == n; lastAttempt = attempts == MAX_ATTEMPTS;
          message = won ? $"You guessed it!\nAttempts: {attempts}\nPress any key..."
-            : lastAttempt ? $"No attempts left!\nCorrect Number: {n}\nPress any key..."
-            : $"Too {(guess < n ? "low" : "high")}! Try again.\nGuess again:";
+                       : lastAttempt ? $"No attempts left!\nCorrect Number: {n}\nPress any key..."
+                                     : $"Too {(guess < n ? "low" : "high")}! Try again.\nGuess again:";
          Print (message);
          if (won || lastAttempt) break;
          attempts++;
