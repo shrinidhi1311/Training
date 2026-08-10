@@ -9,39 +9,32 @@ using static System.Console;
 class Program {
    static void Main () {
       int low = 1, high = 100, guess;
-      Print ("Think of a number between 1 and 100, and I will try to guess it.\n" +
-             "Y: Correctly guessed \nL: My guess is too low  \nH: My guess is too high.");
-      bool gameActive = true;
-      while (gameActive) {
+      ConsoleKey response;
+      WriteLine ("Think of a number between 1 and 100, and I will try to guess it.\n" +
+                 "Y: Correctly guessed\nL: My guess is too low\nH: My guess is too high.");
+      while (low <= high) {
          guess = (low + high) / 2;
-         Response response = ReadResponse (guess);
+         response = ReadResponse (guess);
          Write (response);
-         if (response == Response.Yes) {
-            Print ($"\nI guessed it!\nYour number is {guess}.\nPress any key..");
-            break;
+         if (response == ConsoleKey.Y) {
+            WriteLine ($"\nI guessed it!\nYour number is {guess}.\nPress any key...");
+            ReadKey (true);
+            return;
          }
-         if (response == Response.High) high = guess - 1;
+         if (response == ConsoleKey.H) high = guess - 1;
          else low = guess + 1;
-         gameActive = low <= high;
       }
-      if (!gameActive) Print ("\nI couldn't guess your number.\nPress any key..");
+      WriteLine ("\nI couldn't guess your number.\nPress any key...");
       ReadKey (true);
    }
 
    // Reads the user's response
-   static Response ReadResponse (int guess) {
-      Print ($"\nIs your number {guess,2}? (Y)es, (L)ow, (H)igh: ");
-      for (; ; ) {
-         switch (ReadKey (true).Key) {
-            case ConsoleKey.Y: return Response.Yes;
-            case ConsoleKey.L: return Response.Low;
-            case ConsoleKey.H: return Response.High;
-         }
+   static ConsoleKey ReadResponse (int guess) {
+      Write ($"\nIs your number {guess,2}? (Y)es, (L)ow, (H)igh: ");
+      while (true) {
+         ConsoleKey response = ReadKey (true).Key;
+         if (response == ConsoleKey.Y || response == ConsoleKey.L || response == ConsoleKey.H)
+            return response;
       }
    }
-
-   // Displays a message on the console
-   static void Print (string message) => Write (message);
-
-   enum Response { Yes, Low, High }
 }
