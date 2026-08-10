@@ -8,19 +8,21 @@ using static System.Console;
 
 class Program {
    static void Main () {
-      int low = 1, high = 100, guess;
+      int low = 1, high = 100, guess = 0;
+      bool found = false;
       WriteLine ("Think of a number between 1 and 100, and I will try to guess it.\n" +
                  "Y: Correctly guessed\nL: My guess is too low\nH: My guess is too high.");
-      while (low <= high) {
+      while (low <= high && !found) {
          guess = (low + high) / 2;
          switch (ReadResponse (guess)) {
             case ConsoleKey.L: low = guess + 1; break;
             case ConsoleKey.H: high = guess - 1; break;
-            default:
-               WriteLine ($"\nI guessed it!\nYour number is {guess}.\nPress any key...");
-               ReadKey (true);
-               return;
+            default: found = true; break;
          }
+      }
+      if (found) {
+         WriteLine ($"\nI guessed it!\nYour number is {guess}.\nPress any key...");
+         ReadKey (true);
       }
    }
 
