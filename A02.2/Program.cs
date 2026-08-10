@@ -16,25 +16,28 @@ class Program {
          guess = (low + high) / 2;
          response = ReadResponse (guess);
          Write (response);
-         if (response == ConsoleKey.Y) {
-            WriteLine ($"\nI guessed it!\nYour number is {guess}.\nPress any key...");
-            ReadKey (true);
-            return;
+         switch (response) {
+            case ConsoleKey.Y:
+               WriteLine ($"\nI guessed it!\nYour number is {guess}.\nPress any key...");
+               ReadKey (true);
+               return;
+            case ConsoleKey.L:
+               low = guess + 1;
+               break;
+            case ConsoleKey.H:
+               high = guess - 1;
+               break;
          }
-         if (response == ConsoleKey.H) high = guess - 1;
-         else low = guess + 1;
       }
-      WriteLine ("\nI couldn't guess your number.\nPress any key...");
-      ReadKey (true);
    }
 
-   // Reads the user's response
+   // Reads the user's response and returns it as a ConsoleKey enum
    static ConsoleKey ReadResponse (int guess) {
       Write ($"\nIs your number {guess,2}? (Y)es, (L)ow, (H)igh: ");
-      while (true) {
-         ConsoleKey response = ReadKey (true).Key;
-         if (response == ConsoleKey.Y || response == ConsoleKey.L || response == ConsoleKey.H)
-            return response;
-      }
+      ConsoleKey response;
+      while ((response = ReadKey (true).Key) is not ConsoleKey.Y
+                                             and not ConsoleKey.L
+                                             and not ConsoleKey.H) { }
+      return response;
    }
 }
