@@ -12,7 +12,7 @@ class Program {
       bool found = false;
       WriteLine ("Think of a number between 1 and 100, and I will try to guess it.\n" +
                  "Y: Correctly guessed\nL: My guess is too low\nH: My guess is too high.");
-      while (low <= high && !found) {
+      while (!found) {
          guess = (low + high) / 2;
          switch (ReadResponse (guess)) {
             case ConsoleKey.L: low = guess + 1; break;
@@ -20,13 +20,11 @@ class Program {
             default: found = true; break;
          }
       }
-      if (found) {
-         WriteLine ($"\nI guessed it!\nYour number is {guess}.\nPress any key...");
-         ReadKey (true);
-      }
+      WriteLine ($"\nI guessed it!\nYour number is {guess}.\nPress any key...");
+      ReadKey (true);
    }
 
-   // Reads the user's response and returns it as a ConsoleKey enum
+   // Prints and returns the user's valid response
    static ConsoleKey ReadResponse (int guess) {
       Write ($"\nIs your number {guess,2}? (Y)es, (L)ow, (H)igh: ");
       ConsoleKey response = 0;
