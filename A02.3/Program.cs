@@ -8,21 +8,23 @@ using static System.Console;
 
 class Program {
    static void Main () {
-      Write ("Think of a number between 1 and 100." + "\nAnswer each question with Y or N.");
+      Write ("Think of a number between 1 and 127." + "\nAnswer each question with Y or N.");
       int number = 0, divisor = 1;
+      string prompt;
       while (divisor <= 64) {
-         Write ($"\nIs the remainder when divided by {divisor * 2} less than {divisor}? (Y/N): ");
-         number += GetResponse () * divisor;
+         prompt = $"\nWhen the number is divided by {divisor * 2,3}, Is the remainder less than {divisor,2}? (Y/N): ";
+         number += GetResponse (prompt) * divisor;
          divisor *= 2;
       }
       WriteLine ($"\nYour number is {number}.");
    }
 
-   // Reads and validates the user's response and returns the corresponding bit
-   static int GetResponse () {
-      ConsoleKey response = 0;
-      while (!(response is ConsoleKey.Y or ConsoleKey.N)) response = ReadKey (true).Key;
-      Write (response);
-      return response == ConsoleKey.N ? 1 : 0;
+   // Displays the prompt, reads and validates the user's response, and returns the corresponding bit
+   static int GetResponse (string prompt) {
+      Write (prompt);
+      ConsoleKey key = 0;
+      while (!(key is ConsoleKey.Y or ConsoleKey.N)) key = ReadKey (true).Key;
+      Write (key);
+      return key == ConsoleKey.N ? 1 : 0;
    }
 }
