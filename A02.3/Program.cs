@@ -10,20 +10,20 @@ using static System.Console;
 class Program {
    static void Main () {
       Write ("Think of a number between 1 and 127.\nAnswer each question with Y or N.");
-      int remainder = 0, divisor = 1, bit, number;
+      int remainder = 0, divisor = 1, bit;
+      string prompt;
       StringBuilder sb = new ();
       while (divisor <= 64) {
-         bit = GetResponse ($"\nWhen the number is divided by {divisor * 2, 3}, " +
-                            $"is the remainder {remainder, 3}? (Y/N): ");
+         prompt = $"\nWhen the number is divided by {divisor * 2, 3}, Is the remainder {remainder, 3}? (Y/N): ";
+         bit = GetResponse (prompt);
          sb.Insert (0, bit);
          remainder += bit * divisor;
          divisor *= 2;
       }
-      number = Convert.ToInt32 (sb.ToString (), 2);
-      WriteLine ($"\nYour number is {number}.");
+      WriteLine ($"\nYour number is {Convert.ToInt32 (sb.ToString (), 2)}.");
    }
 
-   // Displays the prompt, reads and validates the user's response, and returns the corresponding binary bit
+   // Returns the user's response to the given prompt as an integer
    static int GetResponse (string prompt) {
       Write (prompt);
       ConsoleKey key = 0;
