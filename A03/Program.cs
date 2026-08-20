@@ -4,13 +4,23 @@
 // ------------------------------------------------------------------------------------------------
 // Program.cs
 // Program to identify valid words using a given set of letters, calculate their scores and rank them.
+using System.Reflection;
 using static System.Console;
-class Program {
 
+#region Program -----------------------------------------------------
+class Program {
+   static readonly char[] allowedLetters = ['U', 'X', 'A', 'L', 'T', 'N', 'E'];
+
+   #region Methods -------------------------------------------------
    static void Main () {
-      char[] allowedLetters = ['U', 'X', 'A', 'L', 'T', 'N', 'E'];
-      string[] words = File.ReadAllLines ("words.txt");
-      Dictionary<string, int> result = new ();
+      var assembly = Assembly.GetExecutingAssembly ();
+      var resourceName = assembly.GetManifestResourceNames ()
+         .First (name => name.EndsWith ("words.txt"));
+      using var stream = assembly.GetManifestResourceStream (resourceName)!;
+      using var reader = new StreamReader (stream);
+      string[] words = reader.ReadToEnd ()
+                            .Split (["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
+      Dictionary<string, int> result = [];
       foreach (string word in words)
          if (IsValid (word)) result[word] = Score (word);
       int totalScore = 0;
@@ -21,17 +31,21 @@ class Program {
          WriteLine ($"{item.Value,3}. {item.Key}");
       }
       WriteLine ($"----\n{totalScore,3} Total");
-
-      // Checks whether the word meets the required letter and length conditions
-      bool IsValid (string word)
-         => word.Length >= 4 && word.Contains (allowedLetters[0])
-                             && word.All (allowedLetters.Contains);
-
-      // Calculates the score based on word length and pangram status
-      int Score (string word)
-         => word.Length == 4 ? 1 : IsPangram (word) ? word.Length + 7 : word.Length;
-
-      // Checks whether the word contains all the allowed letters
-      bool IsPangram (string word) => allowedLetters.All (word.Contains);
    }
+   #endregion
+
+   #region Implementation ------------------------------------------
+   // Checks whether the word meets the required letter and length conditions
+   static bool IsValid (string word)
+       => word.Length >= 4 && word.Contains (allowedLetters[0])
+                           && word.All (allowedLetters.Contains);
+
+   // Calculates the score based on word length and pangram status
+   static int Score (string word)
+       => word.Length == 4 ? 1 : IsPangram (word) ? word.Length + 7 : word.Length;
+
+   // Checks whether the word contains all the allowed letters
+   static bool IsPangram (string word) => allowedLetters.All (word.Contains);
+   #endregion
 }
+#endregion
