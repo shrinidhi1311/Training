@@ -9,7 +9,6 @@ using static System.Console;
 
 #region Program -----------------------------------------------------
 class Program {
-   static readonly char[] allowedLetters = ['U', 'X', 'A', 'L', 'T', 'N', 'E'];
 
    #region Methods -------------------------------------------------
    static void Main () {
@@ -19,7 +18,7 @@ class Program {
       using var stream = assembly.GetManifestResourceStream (resourceName)!;
       using var reader = new StreamReader (stream);
       string[] words = reader.ReadToEnd ()
-                            .Split (["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
+                             .Split (["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
       Dictionary<string, int> result = [];
       foreach (string word in words)
          if (IsValid (word)) result[word] = Score (word);
@@ -37,15 +36,19 @@ class Program {
    #region Implementation ------------------------------------------
    // Checks whether the word meets the required letter and length conditions
    static bool IsValid (string word)
-       => word.Length >= 4 && word.Contains (allowedLetters[0])
-                           && word.All (allowedLetters.Contains);
+       => word.Length >= 4 && word.Contains (sAllowedLetters[0])
+                           && word.All (sAllowedLetters.Contains);
 
    // Calculates the score based on word length and pangram status
    static int Score (string word)
        => word.Length == 4 ? 1 : IsPangram (word) ? word.Length + 7 : word.Length;
 
    // Checks whether the word contains all the allowed letters
-   static bool IsPangram (string word) => allowedLetters.All (word.Contains);
+   static bool IsPangram (string word) => sAllowedLetters.All (word.Contains);
+   #endregion
+
+   #region Field ----------------------------------------------------
+   static readonly char[] sAllowedLetters = ['U', 'X', 'A', 'L', 'T', 'N', 'E'];
    #endregion
 }
 #endregion
