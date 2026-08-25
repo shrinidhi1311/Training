@@ -7,10 +7,8 @@
 using System.Reflection;
 using static System.Console;
 
-#region Program -----------------------------------------------------
+#region class Program -----------------------------------------------------------------------------
 class Program {
-
-   #region Methods -------------------------------------------------
    static void Main () {
       var assembly = Assembly.GetExecutingAssembly ();
       var resourceName = assembly.GetManifestResourceNames ()
@@ -31,9 +29,8 @@ class Program {
       }
       WriteLine ($"----\n{totalScore,3} Total");
    }
-   #endregion
 
-   #region Implementation ------------------------------------------
+   #region Implementation -------------------------------------------
    // Checks whether the word meets the required letter and length conditions
    static bool IsValid (string word)
        => word.Length >= 4 && word.Contains (sAllowedLetters[0])
@@ -47,7 +44,7 @@ class Program {
    static bool IsPangram (string word) => sAllowedLetters.All (word.Contains);
    #endregion
 
-   #region Field ----------------------------------------------------
+   #region Fields ---------------------------------------------------
    static readonly char[] sAllowedLetters = ['U', 'X', 'A', 'L', 'T', 'N', 'E'];
    #endregion
 }
