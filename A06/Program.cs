@@ -20,7 +20,7 @@ class Program {
       PrintSolutions (SolveQueens (showUnique), showUnique ? "Unique Solutions" : "All Solutions");
    }
 
-   #region Implementation ------------------------------------------
+   #region Implementation -------------------------------------------
    // Finds all valid queen placements using backtracking.
    static List<int[]> SolveQueens (bool findUnique) {
       List<int[]> solutions = [];
@@ -33,8 +33,7 @@ class Program {
       void PlaceQueen (int row) {
          for (positions[row] = 0; positions[row] < N; positions[row]++) {
             if (IsValid (row)) {
-               if (row < N - 1)
-                  PlaceQueen (row + 1);
+               if (row < N - 1) PlaceQueen (row + 1);
                else {
                   int[] solution = [.. positions];
                   if (!findUnique || IsUnique (solution)) {
@@ -71,15 +70,14 @@ class Program {
       // Rotates a queen placement by 90 degrees.
       static int[] RotateBoard (int[] positions) {
          int[] rotated = new int[N];
-         for (int row = 0; row < N; row++)
-            rotated[positions[row]] = N - row - 1;
+         for (int row = 0; row < N; row++) rotated[positions[row]] = N - row - 1;
          return rotated;
       }
 
       // Creates the mirror image of a queen placement.
       static int[] Mirror (int[] positions) => [.. positions.Reverse ()];
 
-      // Checks if a solution already exists in the list of solutions.
+      // Checks if a solution already exists in the list of symmetries.
       bool IsUnique (int[] test) => !symmetries.Contains (ArrayToString (test));
    }
 
@@ -90,7 +88,7 @@ class Program {
       while (true) {
          SetCursorPosition (0, 0);
          WriteLine (title);
-         WriteLine ($"Solution {solutionNumber + 1,2} of {solutions.Count}\n");
+         WriteLine ($"Solution {solutionNumber + 1, 2} of {solutions.Count}\n");
          PrintBoard (solutions[solutionNumber]);
          WriteLine ("\n[←] Back    [→] Next    [Esc] Exit");
          ConsoleKey key;
@@ -118,8 +116,7 @@ class Program {
          for (int column = 0; column < N; column++)
             Write ((queens[row] == column ? QUEEN : EMPTY) + VERTICAL);
          WriteLine ();
-         if (row < N - 1)
-            WriteLine (Border (MID));
+         if (row < N - 1) WriteLine (Border (MID));
       }
       WriteLine (Border (BOTTOM));
    }
@@ -129,7 +126,7 @@ class Program {
        => pattern[0] + string.Join (pattern[1], Enumerable.Repeat (HORIZONTAL, N)) + pattern[2];
    #endregion
 
-   #region Constants -----------------------------------------------------------------------------
+   #region Constants ------------------------------------------------
    const string TOP = "┌┬┐";
    const string MID = "├┼┤";
    const string BOTTOM = "└┴┘";
