@@ -26,22 +26,34 @@ class Program {
       List<int[]> solutions = [];
       HashSet<string> symmetries = [];
       int[] positions = new int[N];
+      bool[] columns = new bool[N];
+      bool[] diagonals = new bool[2 * N - 1];
+      bool[] antiDiagonals = new bool[2 * N - 1];
       PlaceQueen (0);
       return solutions;
 
       // Recursively places queens on the board.
       void PlaceQueen (int row) {
-         for (positions[row] = 0; positions[row] < N; positions[row]++) {
-            if (IsValid (row)) {
-               if (row < N - 1) PlaceQueen (row + 1);
-               else {
-                  int[] solution = [.. positions];
-                  if (!findUnique || IsUnique (solution)) {
-                     solutions.Add (solution);
-                     if (findUnique) AddSymmetries (solution);
-                  }
+         for (int column = 0; column < N; column++) {
+            int diagonal = row - column + N - 1;
+            int antiDiagonal = row + column;
+            if (columns[column] || diagonals[diagonal] || antiDiagonals[antiDiagonal])
+               continue;
+            positions[row] = column;
+            columns[column] = true;
+            diagonals[diagonal] = true;
+            antiDiagonals[antiDiagonal] = true;
+            if (row < N - 1) PlaceQueen (row + 1);
+            else {
+               int[] solution = [.. positions];
+               if (!findUnique || IsUnique (solution)) {
+                  solutions.Add (solution);
+                  if (findUnique) AddSymmetries (solution);
                }
             }
+            columns[column] = false;
+            diagonals[diagonal] = false;
+            antiDiagonals[antiDiagonal] = false;
          }
       }
 
@@ -55,17 +67,6 @@ class Program {
       }
 
       string ArrayToString (int[] solution) => string.Join (",", solution);
-
-      // Checks if the queen placement is valid.
-      bool IsValid (int row) {
-         for (int previousRow = 0; previousRow < row; previousRow++) {
-            int rowDifference = row - previousRow;
-            int columnDifference = Math.Abs (positions[row] - positions[previousRow]);
-            if (columnDifference == 0 || columnDifference == rowDifference)
-               return false;
-         }
-         return true;
-      }
 
       // Rotates a queen placement by 90 degrees.
       static int[] RotateBoard (int[] positions) {
@@ -88,7 +89,7 @@ class Program {
       while (true) {
          SetCursorPosition (0, 0);
          WriteLine (title);
-         WriteLine ($"Solution {solutionNumber + 1, 2} of {solutions.Count}\n");
+         WriteLine ($"Solution {solutionNumber + 1,2} of {solutions.Count}\n");
          PrintBoard (solutions[solutionNumber]);
          WriteLine ("\n[←] Back    [→] Next    [Esc] Exit");
          ConsoleKey key;
@@ -110,20 +111,26 @@ class Program {
 
    // Displays a queen placement as a chess board.
    static void PrintBoard (int[] queens) {
-      WriteLine (Border (TOP));
+      WriteLine (TopBorder);
       for (int row = 0; row < N; row++) {
          Write (VERTICAL);
          for (int column = 0; column < N; column++)
             Write ((queens[row] == column ? QUEEN : EMPTY) + VERTICAL);
          WriteLine ();
-         if (row < N - 1) WriteLine (Border (MID));
+         if (row < N - 1) WriteLine (MiddleBorder);
       }
-      WriteLine (Border (BOTTOM));
+      WriteLine (BottomBorder);
    }
 
    // Creates a board border using the specified pattern.
    static string Border (string pattern)
        => pattern[0] + string.Join (pattern[1], Enumerable.Repeat (HORIZONTAL, N)) + pattern[2];
+   #endregion
+
+   #region Fields ---------------------------------------------------
+   static readonly string TopBorder = Border (TOP);
+   static readonly string MiddleBorder = Border (MID);
+   static readonly string BottomBorder = Border (BOTTOM);
    #endregion
 
    #region Constants ------------------------------------------------
