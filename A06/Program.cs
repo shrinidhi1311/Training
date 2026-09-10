@@ -22,7 +22,7 @@ class Program {
 
    #region Implementation -------------------------------------------
    // Finds all valid queen placements using backtracking.
-   static List<int[]> SolveQueens (bool findUnique) {
+   static List<int[]> SolveQueens (bool iFindUnique) {
       List<int[]> solutions = [];
       HashSet<string> symmetries = [];
       int[] positions = new int[N];
@@ -46,9 +46,9 @@ class Program {
             if (row < N - 1) PlaceQueen (row + 1);
             else {
                int[] solution = [.. positions];
-               if (!findUnique || IsUnique (solution)) {
+               if (!iFindUnique || IsUnique (solution)) {
                   solutions.Add (solution);
-                  if (findUnique) AddSymmetries (solution);
+                  if (iFindUnique) AddSymmetries (solution);
                }
             }
             iColumns[column] = false;
