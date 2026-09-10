@@ -16,8 +16,8 @@ class Program {
       ConsoleKey response;
       while ((response = ReadKey (true).Key) is not (ConsoleKey.A or ConsoleKey.U)) ;
       Clear ();
-      bool showUnique = response == ConsoleKey.U;
-      PrintSolutions (SolveQueens (showUnique), showUnique ? "Unique Solutions" : "All Solutions");
+      bool iShowUnique = response == ConsoleKey.U;
+      PrintSolutions (SolveQueens (iShowUnique), iShowUnique ? "Unique Solutions" : "All Solutions");
    }
 
    #region Implementation -------------------------------------------
@@ -26,9 +26,9 @@ class Program {
       List<int[]> solutions = [];
       HashSet<string> symmetries = [];
       int[] positions = new int[N];
-      bool[] columns = new bool[N];
-      bool[] diagonals = new bool[2 * N - 1];
-      bool[] antiDiagonals = new bool[2 * N - 1];
+      bool[] iColumns = new bool[N];
+      bool[] iDiagonals = new bool[2 * N - 1];
+      bool[] iAntiDiagonals = new bool[2 * N - 1];
       PlaceQueen (0);
       return solutions;
 
@@ -37,12 +37,12 @@ class Program {
          for (int column = 0; column < N; column++) {
             int diagonal = row - column + N - 1;
             int antiDiagonal = row + column;
-            if (columns[column] || diagonals[diagonal] || antiDiagonals[antiDiagonal])
+            if (iColumns[column] || iDiagonals[diagonal] || iAntiDiagonals[antiDiagonal])
                continue;
             positions[row] = column;
-            columns[column] = true;
-            diagonals[diagonal] = true;
-            antiDiagonals[antiDiagonal] = true;
+            iColumns[column] = true;
+            iDiagonals[diagonal] = true;
+            iAntiDiagonals[antiDiagonal] = true;
             if (row < N - 1) PlaceQueen (row + 1);
             else {
                int[] solution = [.. positions];
@@ -51,9 +51,9 @@ class Program {
                   if (findUnique) AddSymmetries (solution);
                }
             }
-            columns[column] = false;
-            diagonals[diagonal] = false;
-            antiDiagonals[antiDiagonal] = false;
+            iColumns[column] = false;
+            iDiagonals[diagonal] = false;
+            iAntiDiagonals[antiDiagonal] = false;
          }
       }
 
@@ -111,15 +111,15 @@ class Program {
 
    // Displays a queen placement as a chess board.
    static void PrintBoard (int[] queens) {
-      WriteLine (TopBorder);
+      WriteLine (sTopBorder);
       for (int row = 0; row < N; row++) {
          Write (VERTICAL);
          for (int column = 0; column < N; column++)
             Write ((queens[row] == column ? QUEEN : EMPTY) + VERTICAL);
          WriteLine ();
-         if (row < N - 1) WriteLine (MiddleBorder);
+         if (row < N - 1) WriteLine (sMiddleBorder);
       }
-      WriteLine (BottomBorder);
+      WriteLine (sBottomBorder);
    }
 
    // Creates a board border using the specified pattern.
@@ -128,9 +128,9 @@ class Program {
    #endregion
 
    #region Fields ---------------------------------------------------
-   static readonly string TopBorder = Border (TOP);
-   static readonly string MiddleBorder = Border (MID);
-   static readonly string BottomBorder = Border (BOTTOM);
+   static readonly string sTopBorder = Border (TOP);
+   static readonly string sMiddleBorder = Border (MID);
+   static readonly string sBottomBorder = Border (BOTTOM);
    #endregion
 
    #region Constants ------------------------------------------------
