@@ -32,9 +32,7 @@ class Program {
       int position = 0, numSign = 1, digitCount = 0, len = input.Length;
       double number = 0;
       if (len == 0) return NAN;
-      if (input[position] is '+' or '-') {
-         numSign = input[position++] == '-' ? -1 : 1;
-      }
+      if (input[position] is '+' or '-') numSign = input[position++] == '-' ? -1 : 1;
       while (position < len && char.IsDigit (input[position])) {
          number = number * 10 + input[position++] - '0';
          digitCount++;
@@ -53,9 +51,8 @@ class Program {
       if (position < len && input[position] is 'e' or 'E') {
          position++;
          int expSign = 1, expVal = 0, expDigits = 0;
-         if (position < len && input[position] is '+' or '-') {
+         if (position < len && input[position] is '+' or '-')
             expSign = input[position++] == '-' ? -1 : 1;
-         }
          while (position < len && char.IsDigit (input[position])) {
             expVal = expVal * 10 + input[position++] - '0';
             expDigits++;
@@ -67,7 +64,7 @@ class Program {
    }
    #endregion
 
-   #region Constant -------------------------------------------------
+   #region Private data ---------------------------------------------
    const double NAN = double.NaN;
    #endregion
 }
