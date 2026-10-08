@@ -7,11 +7,9 @@
 // ------------------------------------------------------------------------------------------------
 using static System.Console;
 
-#region Class Program -----------------------------------------------------------------------------
+#region class Program -----------------------------------------------------------------------------
 /// <summary>Tests the generic queue implementation.</summary>
 class Program {
-   static int mTestNumber;
-   static int mPassedTests;
    static void Main () {
       WriteLine ("Test Results");
       WriteLine ("------------");
@@ -22,12 +20,11 @@ class Program {
       Test5 ();
       Test6 ();
       Test7 ();
-      WriteLine ();
-      WriteLine ($"Result: {mPassedTests}/{mTestNumber} Tests Passed");
+      WriteLine ($"\nResult: {sPassedTests}/{sTestNumber} Tests Passed");
    }
 
    #region Implementation -------------------------------------------
-   // Tests a single element.
+   // Tests a single element
    static void Test1 () {
       var queue = new TQueue<int> ();
       queue.Enqueue (25);
@@ -35,7 +32,7 @@ class Program {
       Print ("Single element", res.SequenceEqual ([25]));
    }
 
-   // Tests FIFO order.
+   // Tests FIFO order
    static void Test2 () {
       var queue = new TQueue<int> ();
       for (int i = 1; i <= 3; i++) queue.Enqueue (i * 10);
@@ -44,7 +41,7 @@ class Program {
       Print ("FIFO order", res.SequenceEqual ([10, 20, 30]));
    }
 
-   // Tests circular movement.
+   // Tests circular movement
    static void Test3 () {
       var queue = new TQueue<int> ();
       for (int i = 1; i <= 4; i++) queue.Enqueue (i);
@@ -57,7 +54,7 @@ class Program {
       Print ("Circular order", res.SequenceEqual ([3, 4, 5, 6]));
    }
 
-   // Tests the empty state.
+   // Tests the empty state
    static void Test4 () {
       var queue = new TQueue<int> ();
       queue.Enqueue (10);
@@ -65,7 +62,7 @@ class Program {
       Print ("Empty state", queue.IsEmpty);
    }
 
-   // Tests automatic resizing.
+   // Tests automatic resizing
    static void Test5 () {
       var queue = new TQueue<int> ();
       for (int i = 0; i < 8; i++) queue.Enqueue (i);
@@ -74,7 +71,7 @@ class Program {
       Print ("Resize", res.SequenceEqual ([0, 1, 2, 3, 4, 5, 6, 7]));
    }
 
-   // Tests resizing after circular wrapping.
+   // Tests resizing after circular wrapping
    static void Test6 () {
       var queue = new TQueue<int> ();
       for (int i = 1; i <= 4; i++) queue.Enqueue (i * 10);
@@ -86,7 +83,7 @@ class Program {
       Print ("Wrapped resize", res.SequenceEqual ([30, 40, 50, 60, 70]));
    }
 
-   // Tests Dequeue on an empty queue.
+   // Tests Dequeue on an empty queue
    static void Test7 () {
       var queue = new TQueue<int> ();
       bool passed = false;
@@ -98,14 +95,18 @@ class Program {
       Print ("Empty Dequeue", passed);
    }
 
-   // Displays the test result.
+   // Displays the test result
    static void Print (string name, bool passed) {
-      mTestNumber++;
-      if (passed) mPassedTests++;
+      sTestNumber++;
+      if (passed) sPassedTests++;
       ForegroundColor = passed ? ConsoleColor.Green : ConsoleColor.Red;
-      WriteLine ($"{mTestNumber}. {name,-20} : {(passed ? "PASS" : "FAIL")}");
+      WriteLine ($"{sTestNumber}. {name,-20} : {(passed ? "PASS" : "FAIL")}");
       ResetColor ();
    }
+   #endregion
+
+   #region Private data----------------------------------------------
+   static int sTestNumber, sPassedTests;
    #endregion
 }
 #endregion
