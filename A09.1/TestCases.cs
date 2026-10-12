@@ -8,7 +8,7 @@
 using static System.Console;
 
 #region class Program -----------------------------------------------------------------------------
-/// <summary>Tests the generic queue implementation.</summary>
+// Tests the generic queue implementation.
 class Program {
    static void Main () {
       WriteLine ("Test Results");
@@ -19,26 +19,22 @@ class Program {
       Test4 ();
       Test5 ();
       Test6 ();
-      Test7 ();
       WriteLine ($"\nResult: {sPassedTests}/{sTestNumber} Tests Passed");
    }
 
    #region Implementation -------------------------------------------
-   // Tests a single element
+   // Tests a single element and empty state
    static void Test1 () {
       var queue = new TQueue<int> ();
       queue.Enqueue (25);
-      var res = new List<int> { queue.Dequeue () };
-      Print ("Single element", res.SequenceEqual ([25]));
+      Print ("Single element and empty state", queue.Dequeue () == 25 && queue.IsEmpty);
    }
 
    // Tests FIFO order
    static void Test2 () {
       var queue = new TQueue<int> ();
-      for (int i = 1; i <= 3; i++) queue.Enqueue (i * 10);
-      var res = new List<int> ();
-      while (!queue.IsEmpty) res.Add (queue.Dequeue ());
-      Print ("FIFO order", res.SequenceEqual ([10, 20, 30]));
+      for (int i = 1; i <= 3; i++) queue.Enqueue (i);
+      Print ("FIFO order", VerifyOrder (queue, 1, 3));
    }
 
    // Tests circular movement
@@ -49,42 +45,28 @@ class Program {
       queue.Dequeue ();
       queue.Enqueue (5);
       queue.Enqueue (6);
-      var res = new List<int> ();
-      while (!queue.IsEmpty) res.Add (queue.Dequeue ());
-      Print ("Circular order", res.SequenceEqual ([3, 4, 5, 6]));
-   }
-
-   // Tests the empty state
-   static void Test4 () {
-      var queue = new TQueue<int> ();
-      queue.Enqueue (10);
-      queue.Dequeue ();
-      Print ("Empty state", queue.IsEmpty);
+      Print ("Circular order", VerifyOrder (queue, 3, 6));
    }
 
    // Tests automatic resizing
-   static void Test5 () {
+   static void Test4 () {
       var queue = new TQueue<int> ();
       for (int i = 0; i < 8; i++) queue.Enqueue (i);
-      var res = new List<int> ();
-      while (!queue.IsEmpty) res.Add (queue.Dequeue ());
-      Print ("Resize", res.SequenceEqual ([0, 1, 2, 3, 4, 5, 6, 7]));
+      Print ("Resize", VerifyOrder (queue, 0, 7));
    }
 
    // Tests resizing after circular wrapping
-   static void Test6 () {
+   static void Test5 () {
       var queue = new TQueue<int> ();
-      for (int i = 1; i <= 4; i++) queue.Enqueue (i * 10);
+      for (int i = 1; i <= 4; i++) queue.Enqueue (i);
       queue.Dequeue ();
       queue.Dequeue ();
-      for (int i = 5; i <= 7; i++) queue.Enqueue (i * 10);
-      var res = new List<int> ();
-      while (!queue.IsEmpty) res.Add (queue.Dequeue ());
-      Print ("Wrapped resize", res.SequenceEqual ([30, 40, 50, 60, 70]));
+      for (int i = 5; i <= 7; i++) queue.Enqueue (i);
+      Print ("Wrapped resize", VerifyOrder (queue, 3, 7));
    }
 
    // Tests Dequeue on an empty queue
-   static void Test7 () {
+   static void Test6 () {
       var queue = new TQueue<int> ();
       bool passed = false;
       try {
@@ -93,6 +75,15 @@ class Program {
          passed = true;
       }
       Print ("Empty Dequeue", passed);
+   }
+
+   // Checks dequeue order against expected values
+   static bool VerifyOrder (TQueue<int> queue, int start, int end) {
+      while (start <= end) {
+         if (queue.IsEmpty || queue.Dequeue () != start) return false;
+         start++;
+      }
+      return queue.IsEmpty;
    }
 
    // Displays the test result
@@ -105,7 +96,7 @@ class Program {
    }
    #endregion
 
-   #region Private data----------------------------------------------
+   #region Private data ---------------------------------------------
    static int sTestNumber, sPassedTests;
    #endregion
 }
