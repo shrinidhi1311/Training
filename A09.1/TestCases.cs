@@ -3,7 +3,7 @@
 // Copyright (c) TRUMPF Metamation India.
 // ------------------------------------------------------------------------------------------------
 // TestCases.cs
-// Tests the generic queue implementation.
+// Compares the custom queue with the built-in Queue<int>.
 // ------------------------------------------------------------------------------------------------
 using static System.Console;
 
@@ -11,8 +11,8 @@ using static System.Console;
 // Tests the generic queue implementation.
 class Program {
    static void Main () {
-      WriteLine ("Test Results");
-      WriteLine ("------------");
+      WriteLine ("Queue Validation");
+      WriteLine ("-----------------");
       Test1 ();
       Test2 ();
       Test3 ();
@@ -23,75 +23,105 @@ class Program {
    }
 
    #region Implementation -------------------------------------------
-   // Tests a single element and empty state
+   // Tests a single element
    static void Test1 () {
       var queue = new TQueue<int> ();
-      queue.Enqueue (25);
-      Print ("Single element and empty state", queue.Dequeue () == 25 && queue.IsEmpty);
+      var reference = new Queue<int> ();
+      Enqueue (queue, reference, 25, 25);
+      Print ("Single element", Compare (queue, reference));
    }
 
    // Tests FIFO order
    static void Test2 () {
       var queue = new TQueue<int> ();
-      for (int i = 1; i <= 3; i++) queue.Enqueue (i);
-      Print ("FIFO order", VerifyOrder (queue, 1, 3));
+      var reference = new Queue<int> ();
+      Enqueue (queue, reference, 1, 3);
+      Print ("FIFO order", Compare (queue, reference));
    }
 
    // Tests circular movement
    static void Test3 () {
       var queue = new TQueue<int> ();
-      for (int i = 1; i <= 4; i++) queue.Enqueue (i);
-      queue.Dequeue ();
-      queue.Dequeue ();
-      queue.Enqueue (5);
-      queue.Enqueue (6);
-      Print ("Circular order", VerifyOrder (queue, 3, 6));
+      var reference = new Queue<int> ();
+      Enqueue (queue, reference, 1, 4);
+      bool passed = CompareDequeued (queue, reference, 2);
+      Enqueue (queue, reference, 5, 6);
+      Print ("Circular order", Compare (queue, reference) && passed);
    }
 
    // Tests automatic resizing
    static void Test4 () {
       var queue = new TQueue<int> ();
-      for (int i = 0; i < 8; i++) queue.Enqueue (i);
-      Print ("Resize", VerifyOrder (queue, 0, 7));
+      var reference = new Queue<int> ();
+      Enqueue (queue, reference, 1, 8);
+      Print ("Resize", Compare (queue, reference));
    }
 
    // Tests resizing after circular wrapping
    static void Test5 () {
       var queue = new TQueue<int> ();
-      for (int i = 1; i <= 4; i++) queue.Enqueue (i);
-      queue.Dequeue ();
-      queue.Dequeue ();
-      for (int i = 5; i <= 7; i++) queue.Enqueue (i);
-      Print ("Wrapped resize", VerifyOrder (queue, 3, 7));
+      var reference = new Queue<int> ();
+      Enqueue (queue, reference, 1, 4);
+      bool passed = CompareDequeued (queue, reference, 2);
+      Enqueue (queue, reference, 5, 7);
+      Print ("Wrapped resize", Compare (queue, reference) && passed);
    }
 
    // Tests Dequeue on an empty queue
    static void Test6 () {
       var queue = new TQueue<int> ();
-      bool passed = false;
-      try {
-         queue.Dequeue ();
-      } catch (InvalidOperationException) {
-         passed = true;
-      }
+      var reference = new Queue<int> ();
+      bool passed = ThrowsEmptyDequeue (queue.Dequeue) &&
+                    ThrowsEmptyDequeue (reference.Dequeue);
       Print ("Empty Dequeue", passed);
    }
 
-   // Checks dequeue order against expected values
-   static bool VerifyOrder (TQueue<int> queue, int start, int end) {
-      while (start <= end) {
-         if (queue.IsEmpty || queue.Dequeue () != start) return false;
-         start++;
+   // Adds a range of values to both queues
+   static void Enqueue (TQueue<int> queue, Queue<int> reference, int start, int end) {
+      for (int i = start; i <= end; i++) {
+         queue.Enqueue (i);
+         reference.Enqueue (i);
       }
-      return queue.IsEmpty;
+   }
+
+   // Removes and compares a specified number of elements
+   static bool CompareDequeued (TQueue<int> queue, Queue<int> reference, int count) {
+      bool passed = true;
+      for (int i = 0; i < count; i++)
+         passed &= queue.Dequeue () == reference.Dequeue ();
+      return passed;
+   }
+
+   // Compares remaining elements and checks that both queues empty together
+   static bool Compare (TQueue<int> queue, Queue<int> reference) {
+      bool passed = true;
+      while (!queue.IsEmpty || reference.Count > 0) {
+         if (queue.IsEmpty || reference.Count == 0) {
+            passed = false;
+            break;
+         }
+         passed &= queue.Dequeue () == reference.Dequeue ();
+      }
+      return passed;
+   }
+
+   // Checks whether a dequeue operation throws on an empty queue
+   static bool ThrowsEmptyDequeue (Func<int> dequeue) {
+      try {
+         dequeue ();
+      } catch (InvalidOperationException) {
+         return true;
+      }
+      return false;
    }
 
    // Displays the test result
    static void Print (string name, bool passed) {
       sTestNumber++;
       if (passed) sPassedTests++;
+      Write ($"{sTestNumber}. {name,-22} : ");
       ForegroundColor = passed ? ConsoleColor.Green : ConsoleColor.Red;
-      WriteLine ($"{sTestNumber}. {name,-20} : {(passed ? "PASS" : "FAIL")}");
+      WriteLine (passed ? "PASS" : "FAIL");
       ResetColor ();
    }
    #endregion
