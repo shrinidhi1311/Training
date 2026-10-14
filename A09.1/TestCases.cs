@@ -71,8 +71,7 @@ class Program {
    static void Test6 () {
       var queue = new TQueue<int> ();
       var reference = new Queue<int> ();
-      bool passed = ThrowsEmptyDequeue (queue.Dequeue) &&
-                    ThrowsEmptyDequeue (reference.Dequeue);
+      bool passed = ThrowsEmptyDequeue (queue.Dequeue) && ThrowsEmptyDequeue (reference.Dequeue);
       Print ("Empty Dequeue", passed);
    }
 
@@ -87,8 +86,7 @@ class Program {
    // Removes and compares a specified number of elements
    static bool CompareDequeued (TQueue<int> queue, Queue<int> reference, int count) {
       bool passed = true;
-      for (int i = 0; i < count; i++)
-         passed &= queue.Dequeue () == reference.Dequeue ();
+      for (int i = 0; i < count; i++) passed &= queue.Dequeue () == reference.Dequeue ();
       return passed;
    }
 
