@@ -8,4 +8,5 @@
   <Project Path="A07/A07.csproj" />
   <Project Path="A08/A08.csproj" />
   <Project Path="A09.1/A09.1.csproj" />
+  <Project Path="A09.2/A09.2.csproj" />
 </Solution>
