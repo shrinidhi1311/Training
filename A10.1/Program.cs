@@ -14,7 +14,7 @@ class Program {
    /// <summary>Runs sample paths through ParsePath and prints a result table</summary>
    static void Main () {
       var testCases = new[]{
-            @"C:\WORK\R.TXT", @"D:\A\B.C", @"C:\DIR\APP\CSV\JIR.TXT", @"Z:\ABC\FILE.EXE",
+            @" C:\WORK\R.TXT", @"D:\A\B.C", @"C:\DIR\APP\CSV\JIR.TXT", @"Z:\ABC\FILE.EXE",
             @"E:\DOCS\REPORT.PDF", @"C:\A\B\C\D\E\F\G\FILE.TXT", @"M:\PROJECTS\SRC\MAIN.CS",
             @"F:\X\Y.Z", @"A:\TEMP\LOG.TXT", @"H:\MUSIC\ROCK\SONG.MPG",
             @"C:\README.TXT", @"C:\WORK\r.TXT", @"CZ:\ABC\R.TXT", @"C:\ABC1\FILE.TXT",
@@ -29,20 +29,17 @@ class Program {
             @"C:\ABC\FILE", @"C:\ABC\FILE.", @"C:\ABC\FILE.T1", @"C:\ABC\FILE.TAR.GZ",
             @"README.TXT", @"C:\ABC", @"C:\", @"C:", @"C:\ABC\R~.TXT", "", " "
         };
-      WriteLine ($"| {"Input", -28}| {"Drive", -6}| {"Directory", -16}| {"Filename", -10}| " +
-                 $"{"Extension", -10}| Verdict");
-      WriteLine (new string ('-', 94));
-      int valid = 0;
+      WriteLine ($"| {"Input", -27}| {"Drive", -6}| {"Directory", -16}| {"Filename", -10}| " +
+                 "Extension");
+      WriteLine (new string ('-', 80));
       foreach (var input in testCases) {
          var (isValid, drive, directory, filename, extension) = ParsePath (input);
-         if (isValid) valid++;
-         Write ($"| {input, -28}| {Show (drive), -6}| {Show (directory), -16}| " +
-                $"{Show (filename), -10}| {Show (extension), -10}| ");
+         Write ("| ");
          ForegroundColor = isValid ? ConsoleColor.Green : ConsoleColor.Red;
-         WriteLine (isValid ? "VALID" : "INVALID");
+         Write ($"{input,-27}");
          ResetColor ();
+         WriteLine ($"| {drive,-6}| {directory,-16}| {filename,-10}| {extension}");
       }
-      WriteLine ($"\nValid: {valid}/{testCases.Length}");
    }
    #endregion
 
@@ -53,14 +50,14 @@ class Program {
       Action none = () => { }, todo;
       bool isValid;
       string drive = "", directory = "", filename = "", extension = "";
-      foreach (var ch in input + '~') {
+      foreach (var ch in input.ToUpper().Trim() + '~') {
          (s, todo) = (s, ch) switch {
             (A, >= 'A' and <= 'Z') => (B, () => drive += ch),
             (B, ':') => (C, none),
             (C, '\\') => (D, none),
             (D or E, >= 'A' and <= 'Z') => (E, () => filename += ch),
             (E, '\\') => (D, () => (directory, filename) = (directory == "" ? filename
-                                                           : directory + "," + filename, "")),
+                                                           : directory + "\\" + filename, "")),
             (E, '.') when directory != "" => (F, none),
             (F or G, >= 'A' and <= 'Z') => (G, () => extension += ch),
             (G, '~') => (H, none),
@@ -71,9 +68,6 @@ class Program {
       isValid = s == H;
       return isValid ? (true, drive, directory, filename, extension) : (false, "", "", "", "");
    }
-
-   // Returns "-" for an empty field so blank columns are visible
-   static string Show (string s) => s == "" ? "-" : s;
    #endregion
 }
 #endregion
