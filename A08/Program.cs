@@ -13,13 +13,14 @@ class Program {
    static void Main () {
       var eval = new Evaluator ();
       Console.WriteLine ("Expression Evaluator\n---------------------");
-      Console.WriteLine ("Try 2+3*4, sin(30) or x = 5  |  'test' runs tests\n");
+      Console.WriteLine ("Try 2+3*4, sin(30) or x = 5  |  'test' runs tests | 'exit' to quit\n");
       while (true) {
          Console.Write ("> ");
          string? line = Console.ReadLine ();
          if (line is null) break;
          string input = line.Trim ().ToLowerInvariant ();
-         if (input == "") break;
+         if (input == "") continue;  // ignore blank lines
+         if (input == "exit") break; // deliberate quit
          if (input == "test") { RunTests (eval); break; }
          try {
             double result = eval.Evaluate (input);
