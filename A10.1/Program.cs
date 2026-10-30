@@ -29,15 +29,15 @@ class Program {
             @"C:\ABC\FILE", @"C:\ABC\FILE.", @"C:\ABC\FILE.T1", @"C:\ABC\FILE.TAR.GZ",
             @"README.TXT", @"C:\ABC", @"C:\", @"C:", @"C:\ABC\R~.TXT", "", " "
         };
-      WriteLine ($"| {"Input",-28}| {"Drive",-6}| {"Directory",-16}| {"Filename",-10}| " +
-                 $"{"Extension",-10}| Verdict");
+      WriteLine ($"| {"Input", -28}| {"Drive", -6}| {"Directory", -16}| {"Filename", -10}| " +
+                 $"{"Extension", -10}| Verdict");
       WriteLine (new string ('-', 94));
       int valid = 0;
       foreach (var input in testCases) {
          var (isValid, drive, directory, filename, extension) = ParsePath (input);
          if (isValid) valid++;
-         Write ($"| {input,-28}| {Show (drive),-6}| {Show (directory),-16}| " +
-                $"{Show (filename),-10}| {Show (extension),-10}| ");
+         Write ($"| {input, -28}| {Show (drive), -6}| {Show (directory), -16}| " +
+                $"{Show (filename), -10}| {Show (extension), -10}| ");
          ForegroundColor = isValid ? ConsoleColor.Green : ConsoleColor.Red;
          WriteLine (isValid ? "VALID" : "INVALID");
          ResetColor ();
@@ -79,8 +79,16 @@ class Program {
 #endregion
 
 #region Enum EState -------------------------------------------------
-// States of the path parser; Z is the reject state and H is the accept state
+/// <summary>States of the path parser; Z is the reject state and H is the accept state</summary>
 public enum EState {
-   A, B, C, D, E, F, G, H, Z
+   A,   // Start: expects drive letter
+   B,   // Drive read: expects ':'
+   C,   // Colon read: expects '\'
+   D,   // After '\': expects name letter
+   E,   // In name: letter, '\' (directory), or '.'
+   F,   // After '.': expects extension letter
+   G,   // In extension: letter or '~' (end)
+   H,   // Accept
+   Z    // Reject
 }
 #endregion
