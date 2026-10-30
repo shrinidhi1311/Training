@@ -5,11 +5,13 @@
 // Tokenizer.cs
 // Converts an input expression into tokens
 // ------------------------------------------------------------------------------------------------
+using System.Globalization;
+
 namespace Eval;
 
 #region class Tokenizer ---------------------------------------------------------------------------
 class Tokenizer {
-   #region Constructor ----------------------------------------------
+   #region Constructors ---------------------------------------------
    /// <summary>Initializes the tokenizer with an evaluator and an expression</summary>
    public Tokenizer (Evaluator eval, string text) {
       mText = text; mN = 0; mEval = eval;
@@ -33,10 +35,10 @@ class Tokenizer {
                mExpectOperand = false;
                return new TPunctuation (ch);
             case '-' or '+' when mExpectOperand:
-               return new TOpUnary (mEval, ch);
+               return new TOpUnary (ch);
             case '+' or '-' or '*' or '/' or '^' or '=':
                mExpectOperand = true;
-               return new TOpArithmetic (mEval, ch);
+               return new TOpArithmetic (ch);
             case >= 'a' and <= 'z':
                Token token = GetIdentifier ();
                mExpectOperand = token is TOpFunction;
@@ -49,7 +51,7 @@ class Tokenizer {
    }
    #endregion
 
-   #region  Implementation-------------------------------------------
+   #region Implementation -------------------------------------------
    // Reads an identifier and returns a function or variable token
    Token GetIdentifier () {
       int start = mN - 1;
@@ -61,8 +63,8 @@ class Tokenizer {
          }
          break;
       }
-      string sub = mText[start..mN];
-      if (sFuncs.Contains (sub)) return new TOpFunction (mEval, sub);
+      string sub = mText[start..mN].ToLowerInvariant ();
+      if (sFuncs.Contains (sub)) return new TOpFunction (sub);
       else return new TVariable (mEval, sub);
    }
 
@@ -79,12 +81,13 @@ class Tokenizer {
       }
       // Now, mN points to the first character of mText that is not part of the number
       string sub = mText[start..mN];
-      if (double.TryParse (sub, out double f)) return new TLiteral (f);
+      if (double.TryParse (sub, NumberStyles.Float, CultureInfo.InvariantCulture, out double f))
+         return new TLiteral (f);
       return new TError ($"Invalid number: {sub}");
    }
    #endregion
 
-   #region Private data ---------------------------------------------
+   #region Private Data ---------------------------------------------
    readonly Evaluator mEval;  // The evaluator that owns this
    readonly string mText;     // The input text we're parsing through
    int mN;

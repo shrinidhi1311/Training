@@ -23,7 +23,7 @@ abstract class TNumber : Token {
 
 #region class TLiteral ----------------------------------------------------------------------------
 class TLiteral : TNumber {
-   #region Constructor ----------------------------------------------
+   #region Constructors ---------------------------------------------
    /// <summary>Initializes a numeric literal</summary>
    public TLiteral (double f) => mValue = f;
    #endregion
@@ -37,7 +37,7 @@ class TLiteral : TNumber {
    public override string ToString () => $"literal:{Value}";
    #endregion
 
-   #region Private data ---------------------------------------------
+   #region Private Data ---------------------------------------------
    readonly double mValue;
    #endregion
 }
@@ -45,7 +45,7 @@ class TLiteral : TNumber {
 
 #region class TVariable ---------------------------------------------------------------------------
 class TVariable : TNumber {
-   #region Constructor ----------------------------------------------
+   #region Constructors ---------------------------------------------
    /// <summary>Initializes a variable token</summary>
    public TVariable (Evaluator eval, string name) => (Name, mEval) = (name, eval);
    #endregion
@@ -61,37 +61,27 @@ class TVariable : TNumber {
    public override string ToString () => $"var:{Name}";
    #endregion
 
-   #region Private data ---------------------------------------------
+   #region Private Data ---------------------------------------------
    readonly Evaluator mEval;
    #endregion
 }
 #endregion
 
 #region class TOperator ---------------------------------------------------------------------------
-
 abstract class TOperator : Token {
-   #region Constructor ----------------------------------------------
-   /// <summary>Initializes an operator with its evaluator</summary>
-   protected TOperator (Evaluator eval) => mEval = eval;
-   #endregion
-
    #region Properties -----------------------------------------------
    /// <summary>Gets the operator precedence</summary>
    public abstract int Priority { get; }
    public int FinalPriority { get; set; }
-   #endregion
-
-   #region Private data ---------------------------------------------
-   protected readonly Evaluator mEval;
    #endregion
 }
 #endregion
 
 #region class TOpArithmetic -----------------------------------------------------------------------
 class TOpArithmetic : TOperator {
-   #region Constructor ----------------------------------------------
+   #region Constructors ---------------------------------------------
    /// <summary>Initializes an arithmetic operator</summary>
-   public TOpArithmetic (Evaluator eval, char ch) : base (eval) => Op = ch;
+   public TOpArithmetic (char ch) => Op = ch;
    #endregion
 
    #region Properties -----------------------------------------------
@@ -116,14 +106,14 @@ class TOpArithmetic : TOperator {
    };
    #endregion
 
-   #region Private data ---------------------------------------------
+   #region Private Data ---------------------------------------------
    static readonly Dictionary<char, int> sPriority = new () {
       ['='] = 0,
       ['+'] = 1,
       ['-'] = 1,
       ['*'] = 2,
       ['/'] = 2,
-      ['^'] = 5
+      ['^'] = 4
    };
    #endregion
 }
@@ -131,9 +121,9 @@ class TOpArithmetic : TOperator {
 
 #region class TOpUnary ----------------------------------------------------------------------------
 class TOpUnary : TOperator {
-   #region Constructor ----------------------------------------------
+   #region Constructors ---------------------------------------------
    /// <summary>Initializes a unary operator</summary>
-   public TOpUnary (Evaluator eval, char ch) : base (eval) => Op = ch;
+   public TOpUnary (char ch) => Op = ch;
    #endregion
 
    #region Properties -----------------------------------------------
@@ -153,16 +143,16 @@ class TOpUnary : TOperator {
 
 #region class TOpFunction -------------------------------------------------------------------------
 class TOpFunction : TOperator {
-   #region Constructor ----------------------------------------------
+   #region Constructors ---------------------------------------------
    /// <summary>Initializes a function operator</summary>
-   public TOpFunction (Evaluator eval, string name) : base (eval) => Func = name;
+   public TOpFunction (string name) => Func = name;
    #endregion
 
    #region Properties -----------------------------------------------
    /// <summary>Gets the function name</summary>
    public string Func { get; private set; }
-   /// <summary>Gets the function operator precedence</summary>
-   public override int Priority => 4;
+   /// <summary>Gets the function operator precedence; must exceed '^' so sin(30)^2 = (sin 30)^2</summary>
+   public override int Priority => 6;
    #endregion
 
    #region Methods --------------------------------------------------
@@ -195,7 +185,7 @@ class TOpFunction : TOperator {
 
 #region class TPunctuation ------------------------------------------------------------------------
 class TPunctuation : Token {
-   #region Constructor ----------------------------------------------
+   #region Constructors ---------------------------------------------
    /// <summary>Initializes a punctuation token</summary>
    public TPunctuation (char ch) => Punct = ch;
    #endregion
@@ -221,7 +211,7 @@ class TEnd : Token {
 
 #region class TError ------------------------------------------------------------------------------
 class TError : Token {
-   #region Constructor ----------------------------------------------
+   #region Constructors ---------------------------------------------
    /// <summary>Initializes an error token with a message</summary>
    public TError (string message) => Message = message;
    #endregion

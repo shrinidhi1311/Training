@@ -18,15 +18,11 @@ class EvalException : Exception {
 #region class Evaluator ---------------------------------------------------------------------------
 /// <summary>Evaluates expressions with operators, functions, and variable assignments</summary>
 class Evaluator {
-   #region Property -------------------------------------------------
-   public int BasePriority { get; private set; }
-   #endregion
-
    #region Methods --------------------------------------------------
    public double Evaluate (string text) {
       mOperands.Clear ();
       mOperators.Clear ();
-      BasePriority = 0;
+      mBasePriority = 0;
       List<Token> tokens = [];
       var tokenizer = new Tokenizer (this, text);
       for (; ; ) {
@@ -45,9 +41,8 @@ class Evaluator {
       }
       foreach (var token in tokens) Process (token);
       while (mOperators.Count > 0) ApplyOperator ();
-      if (BasePriority != 0) throw new EvalException ("Mismatched parentheses");
       if (mOperands.Count != 1) throw new EvalException ("Invalid expression");
-      if (mOperators.Count > 0) throw new EvalException ("Too many operators");
+      if (mBasePriority != 0) throw new EvalException ("Mismatched Parentheses");
       double result = mOperands.Pop ();
       if (tVariable != null) mVars[tVariable.Name] = result;
       return result;
@@ -68,14 +63,15 @@ class Evaluator {
             mOperands.Push (num.Value);
             break;
          case TOperator op:
-            op.FinalPriority = op.Priority + BasePriority;
+            op.FinalPriority = op.Priority + mBasePriority;
             // Unary minus must not reduce an operator already on the stack
             if (op is not (TOpUnary or TOpFunction))
                while (!ShouldPush (op)) ApplyOperator ();
             mOperators.Push (op);
             break;
          case TPunctuation p:
-            BasePriority += p.Punct == '(' ? 10 : -10;
+            mBasePriority += p.Punct == '(' ? PARENPRIORITY : -PARENPRIORITY;
+            if (mBasePriority < 0) throw new EvalException ("Mismatched Parentheses");
             break;
          default:
             throw new EvalException ($"Unknown token: {token}");
@@ -108,14 +104,16 @@ class Evaluator {
       if (mOperators.Count == 0) return true;
       TOperator prev = mOperators.Peek ();
       return prev.FinalPriority < op.FinalPriority ||
-         (prev.FinalPriority == op.FinalPriority && op is TOpArithmetic { Op: '^' or '=' });
+         (prev.FinalPriority == op.FinalPriority && op is TOpArithmetic { Op: '^'});
    }
    #endregion
 
-   #region Private data ---------------------------------------------
+   #region Private Data ---------------------------------------------
    readonly Dictionary<string, double> mVars = [];
    readonly Stack<double> mOperands = new ();
    readonly Stack<TOperator> mOperators = new ();
+   const int PARENPRIORITY = 10;   // Must exceed the highest operator priority
+   int mBasePriority;
    #endregion
 }
 #endregion
