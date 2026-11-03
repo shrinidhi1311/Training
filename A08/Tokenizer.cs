@@ -20,38 +20,33 @@ class Tokenizer {
 
    #region Methods --------------------------------------------------
    /// <summary>Returns the next token from the expression</summary>
-   public Token Next () {
+   public Token Next () => mPrev = NextToken ();
+   #endregion
+
+   #region Implementation -------------------------------------------
+   // Reads the next token from the text
+   Token NextToken () {
       while (mN < mText.Length) {
          char ch = char.ToLower (mText[mN++]);
          switch (ch) {
             case ' ' or '\t': continue;
             case (>= '0' and <= '9') or '.':
-               mExpectOperand = false;
                return GetNumber ();
-            case '(':
-               mExpectOperand = true;
+            case '(' or ')':
                return new TPunctuation (ch);
-            case ')':
-               mExpectOperand = false;
-               return new TPunctuation (ch);
-            case '-' or '+' when mExpectOperand:
+            case '-' or '+' when mPrev is null or TOperator or TPunctuation { Punct: '(' }:
                return new TOpUnary (ch);
             case '+' or '-' or '*' or '/' or '^' or '=':
-               mExpectOperand = true;
                return new TOpArithmetic (ch);
             case >= 'a' and <= 'z':
-               Token token = GetIdentifier ();
-               mExpectOperand = token is TOpFunction;
-               return token;
+               return GetIdentifier ();
             default:
                return new TError ($"Unknown symbol: {ch}");
          }
       }
       return new TEnd ();
    }
-   #endregion
 
-   #region Implementation -------------------------------------------
    // Reads an identifier and returns a function or variable token
    Token GetIdentifier () {
       int start = mN - 1;
@@ -64,8 +59,11 @@ class Tokenizer {
          break;
       }
       string sub = mText[start..mN].ToLowerInvariant ();
-      if (sFuncs.Contains (sub)) return new TOpFunction (sub);
-      else return new TVariable (mEval, sub);
+      if (TOpFunction.IsFunction (sub)) return new TOpFunction (sub);
+      int i = mN;
+      while (i < mText.Length && mText[i] is ' ' or '\t') i++;
+      if (i < mText.Length && mText[i] == '(') return new TError ($"Unknown function: {sub}");
+      return new TVariable (mEval, sub);
    }
 
    // Reads a number and returns a literal or an error token
@@ -88,12 +86,10 @@ class Tokenizer {
    #endregion
 
    #region Private Data ---------------------------------------------
-   readonly Evaluator mEval;  // The evaluator that owns this
-   readonly string mText;     // The input text we're parsing through
+   readonly Evaluator mEval; // The evaluator that owns this
+   readonly string mText;    // The input text we're parsing through
    int mN;
-   bool mExpectOperand = true;
-   static readonly HashSet<string> sFuncs = [
-      "sin", "cos", "tan", "sqrt", "log", "exp", "asin", "acos", "atan"];
+   Token? mPrev;             // Last token returned; decides whether '-' is unary or binary
    #endregion
 }
 #endregion

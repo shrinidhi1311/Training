@@ -52,7 +52,7 @@ class TVariable : TNumber {
 
    #region Properties -----------------------------------------------
    /// <summary>Gets the variable name</summary>
-   public string Name { get; private set; }
+   public string Name { get; }
    /// <summary>Gets the current value of the variable</summary>
    public override double Value => mEval.GetVariable (Name);
    #endregion
@@ -64,6 +64,13 @@ class TVariable : TNumber {
    #region Private Data ---------------------------------------------
    readonly Evaluator mEval;
    #endregion
+}
+#endregion
+
+#region class OpPriority --------------------------------------------------------------------------
+/// <summary>Operator precedence, lowest to highest; parentheses add a base above Function</summary>
+static class OpPriority {
+   public const int Assign = 0, Additive = 1, Multiplicative = 2, Unary = 3, Power = 4, Function = 6;
 }
 #endregion
 
@@ -81,14 +88,14 @@ abstract class TOperator : Token {
 class TOpArithmetic : TOperator {
    #region Constructors ---------------------------------------------
    /// <summary>Initializes an arithmetic operator</summary>
-   public TOpArithmetic (char ch) => Op = ch;
+   public TOpArithmetic (char ch) => (Op, Priority) = (ch, sPriority[ch]);
    #endregion
 
    #region Properties -----------------------------------------------
    /// <summary>Gets the arithmetic operator symbol</summary>
-   public char Op { get; private set; }
+   public char Op { get; }
    /// <summary>Gets the precedence of the arithmetic operator</summary>
-   public override int Priority => sPriority[Op];
+   public override int Priority { get; }
    #endregion
 
    #region Methods --------------------------------------------------
@@ -108,12 +115,12 @@ class TOpArithmetic : TOperator {
 
    #region Private Data ---------------------------------------------
    static readonly Dictionary<char, int> sPriority = new () {
-      ['='] = 0,
-      ['+'] = 1,
-      ['-'] = 1,
-      ['*'] = 2,
-      ['/'] = 2,
-      ['^'] = 4
+      ['='] = OpPriority.Assign,
+      ['+'] = OpPriority.Additive,
+      ['-'] = OpPriority.Additive,
+      ['*'] = OpPriority.Multiplicative,
+      ['/'] = OpPriority.Multiplicative,
+      ['^'] = OpPriority.Power
    };
    #endregion
 }
@@ -128,9 +135,9 @@ class TOpUnary : TOperator {
 
    #region Properties -----------------------------------------------
    /// <summary>Gets the unary operator symbol</summary>
-   public char Op { get; private set; }
+   public char Op { get; }
    /// <summary>Gets the precedence of unary minus</summary>
-   public override int Priority => 3;
+   public override int Priority => OpPriority.Unary;
    #endregion
 
    #region Methods --------------------------------------------------
@@ -150,35 +157,44 @@ class TOpFunction : TOperator {
 
    #region Properties -----------------------------------------------
    /// <summary>Gets the function name</summary>
-   public string Func { get; private set; }
+   public string Func { get; }
    /// <summary>Gets the function operator precedence; must exceed '^' so sin(30)^2 = (sin 30)^2</summary>
-   public override int Priority => 6;
+   public override int Priority => OpPriority.Function;
    #endregion
 
    #region Methods --------------------------------------------------
+   /// <summary>Returns true if the given name is a supported function</summary>
+   public static bool IsFunction (string name) => sFuncs.ContainsKey (name);
+
    /// <summary>Returns the function name and its precedence</summary>
    public override string ToString () => $"func:{Func}:{Priority}";
 
-   public double Evaluate (double f) => Func switch {
-      "sin" => Math.Sin (D2R (f)),
-      "cos" => Math.Cos (D2R (f)),
-      "tan" => Math.Tan (D2R (f)),
-      "sqrt" => f < 0 ? throw new EvalException ("sqrt requires a non-negative value")
-                      : Math.Sqrt (f),
-      "log" => f <= 0 ? throw new EvalException ("log requires a value greater than zero")
-                      : Math.Log (f),
-      "exp" => Math.Exp (f),
-      "asin" => R2D (Math.Asin (f)),
-      "acos" => R2D (Math.Acos (f)),
-      "atan" => R2D (Math.Atan (f)),
-      _ => throw new EvalException ($"Unknown function: {Func}")
-   };
+   /// <summary>Evaluates the function for the given argument (angles are in degrees)</summary>
+   public double Evaluate (double f) => sFuncs[Func] (f);
 
    /// <summary>Converts degrees to radians</summary>
    static double D2R (double f) => f * Math.PI / 180;
 
    /// <summary>Converts radians to degrees</summary>
    static double R2D (double f) => f * 180 / Math.PI;
+   #endregion
+
+   #region Private Data ---------------------------------------------
+   static readonly Dictionary<string, Func<double, double>> sFuncs = new () {
+      ["sin"] = f => Math.Sin (D2R (f)),
+      ["cos"] = f => Math.Cos (D2R (f)),
+      ["tan"] = f => Math.Tan (D2R (f)),
+      ["sqrt"] = f => f < 0 ? throw new EvalException ("sqrt requires a non-negative value")
+                            : Math.Sqrt (f),
+      ["log"] = f => f <= 0 ? throw new EvalException ("log requires a value greater than zero")
+                            : Math.Log (f),
+      ["exp"] = f => Math.Exp (f),
+      ["asin"] = f => f is < -1 or > 1 ? throw new EvalException ("asin requires a value between -1 and 1")
+                                       : R2D (Math.Asin (f)),
+      ["acos"] = f => f is < -1 or > 1 ? throw new EvalException ("acos requires a value between -1 and 1")
+                                       : R2D (Math.Acos (f)),
+      ["atan"] = f => R2D (Math.Atan (f)),
+   };
    #endregion
 }
 #endregion
@@ -192,7 +208,7 @@ class TPunctuation : Token {
 
    #region Properties -----------------------------------------------
    /// <summary>Gets the punctuation character</summary>
-   public char Punct { get; private set; }
+   public char Punct { get; }
    #endregion
 
    #region Methods --------------------------------------------------
@@ -218,7 +234,7 @@ class TError : Token {
 
    #region Properties -----------------------------------------------
    /// <summary>Gets the error message</summary>
-   public string Message { get; private set; }
+   public string Message { get; }
    #endregion
 
    #region Methods --------------------------------------------------

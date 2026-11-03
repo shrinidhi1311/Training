@@ -19,7 +19,6 @@ class Program {
          string? line = Console.ReadLine ();
          if (line is null) break;
          string input = line.Trim ().ToLowerInvariant ();
-         if (input == "") continue;  // ignore blank lines
          if (input == "exit") break; // deliberate quit
          if (input == "test") { RunTests (eval); break; }
          try {
@@ -67,7 +66,6 @@ class Program {
          ("sin(30)^2", 0.25),
          ("cos(60)", 0.5),
          ("sin(-30)^2", 0.25),
-         ("abs(-5)", null),
          // Variable assignments
          ("x=10", 10),
          ("x+5", 15),
@@ -82,9 +80,27 @@ class Program {
          ("(2+3", null),
          ("2+3)", null),
          ("2**3", null),
-         ("", null)
+         ("", null),
+         // Unary vs binary context
+         ("x-1", -11),
+         ("-x", 10),
+         ("(2)-3", -1),
+         ("2--3", 5),
+         ("2-(-3)", 5),
+         ("2*-3^2", -18),
+         ("sin-30", -0.5),
+         // Malformed input
+         ("-", null),
+         ("3-", null),
+         ("1.2.3", null),
+         ("x=", null),
+         ("2=3", null),
+         ("asin(2)", null),
+         ("abs(-5)", null),
+         ("exp(1000)", null),
+         ("10^400", null)
       ];
-      Console.WriteLine ($"| {"#",3} | {"Input",-12}| {"Result",-45}| {"Expected",-14}| Verdict");
+      Console.WriteLine ($"| {"#",3} | {"Input",-12}| {"Result",-49}| {"Expected",-14}| Verdict");
       Console.WriteLine (new string ('-', 95));
       int passed = 0;
       for (int i = 0; i < cases.Length; i++) {
@@ -111,7 +127,7 @@ class Program {
    // Prints one aligned table row; only the verdict is coloured
    static void PrintResult (int number, string input, string result,
                            string expected, bool passed) {
-      Console.Write ($"| {number,3} | {input,-12}| {result,-45}| {expected,-14}| ");
+      Console.Write ($"| {number,3} | {input,-12}| {result,-49}| {expected,-14}| ");
       Console.ForegroundColor = passed ? ConsoleColor.Green : ConsoleColor.Red;
       Console.WriteLine (passed ? "PASS" : "FAIL");
       Console.ResetColor ();

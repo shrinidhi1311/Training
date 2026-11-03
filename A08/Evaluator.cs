@@ -20,6 +20,7 @@ class EvalException : Exception {
 class Evaluator {
    #region Methods --------------------------------------------------
    public double Evaluate (string text) {
+      if (text == "") throw new EvalException ("Empty Expression");
       mOperands.Clear ();
       mOperators.Clear ();
       mBasePriority = 0;
@@ -34,16 +35,20 @@ class Evaluator {
 
       // Check if this is a variable assignment
       TVariable? tVariable = null;
-      if (tokens.Count > 2 && tokens[0] is TVariable tvar &&
+      if (tokens.Count >= 2 && tokens[0] is TVariable tvar &&
           tokens[1] is TOpArithmetic { Op: '=' }) {
          tVariable = tvar;
          tokens.RemoveRange (0, 2);
+         if (tokens.Count == 0) throw new EvalException ($"Missing value for '{tvar.Name}'");
       }
+      if (tokens.Exists (t => t is TOpArithmetic { Op: '=' }))
+         throw new EvalException ("Assignment must be of the form 'name=expression'");
       foreach (var token in tokens) Process (token);
       while (mOperators.Count > 0) ApplyOperator ();
-      if (mOperands.Count != 1) throw new EvalException ("Invalid expression");
       if (mBasePriority != 0) throw new EvalException ("Mismatched Parentheses");
+      if (mOperands.Count != 1) throw new EvalException ("Invalid expression");
       double result = mOperands.Pop ();
+      if (!double.IsFinite (result)) throw new EvalException ("Result is undefined");
       if (tVariable != null) mVars[tVariable.Name] = result;
       return result;
    }
@@ -83,7 +88,7 @@ class Evaluator {
       var op = mOperators.Pop ();
       switch (op) {
          case TOpUnary unary:
-            if (mOperands.Count < 1) throw new EvalException ("Missing operand for unary minus");
+            if (mOperands.Count < 1) throw new EvalException ($"Missing operand for unary {unary.Op}");
             mOperands.Push (unary.Evaluate (mOperands.Pop ()));
             break;
          case TOpFunction func:
@@ -96,6 +101,8 @@ class Evaluator {
             double left = mOperands.Pop ();
             mOperands.Push (arith.Evaluate (left, right));
             break;
+         default:
+            throw new EvalException ($"Unknown operator: {op}");
       }
    }
 
@@ -104,7 +111,7 @@ class Evaluator {
       if (mOperators.Count == 0) return true;
       TOperator prev = mOperators.Peek ();
       return prev.FinalPriority < op.FinalPriority ||
-         (prev.FinalPriority == op.FinalPriority && op is TOpArithmetic { Op: '^'});
+         (prev.FinalPriority == op.FinalPriority && op is TOpArithmetic { Op: '^' });
    }
    #endregion
 
@@ -112,7 +119,7 @@ class Evaluator {
    readonly Dictionary<string, double> mVars = [];
    readonly Stack<double> mOperands = new ();
    readonly Stack<TOperator> mOperators = new ();
-   const int PARENPRIORITY = 10;   // Must exceed the highest operator priority
+   const int PARENPRIORITY = OpPriority.Function + 1;  // Must exceed the highest operator priority
    int mBasePriority;
    #endregion
 }
