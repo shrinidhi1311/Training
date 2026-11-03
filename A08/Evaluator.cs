@@ -8,7 +8,6 @@
 namespace Eval;
 
 #region class EvalException -----------------------------------------------------------------------
-
 class EvalException : Exception {
    /// <summary>Initializes an exception with an error message</summary>
    public EvalException (string message) : base (message) { }
@@ -32,7 +31,6 @@ class Evaluator {
          if (token is TError err) throw new EvalException (err.Message);
          tokens.Add (token);
       }
-
       // Check if this is a variable assignment
       TVariable? tVariable = null;
       if (tokens.Count >= 2 && tokens[0] is TVariable tvar &&
