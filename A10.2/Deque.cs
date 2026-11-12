@@ -7,7 +7,7 @@
 // ------------------------------------------------------------------------------------------------
 
 #region class TDeque ------------------------------------------------------------------------------
-/// <summary>Implements a generic FIFO queue using a circular buffer</summary>
+/// <summary>Implements a generic double-ended queue using a circular buffer</summary>
 public class TDeque<T> {
    #region Properties -----------------------------------------------
    /// <summary>Gets whether the queue is empty</summary>
@@ -15,57 +15,71 @@ public class TDeque<T> {
    #endregion
 
    #region Methods --------------------------------------------------
-   ///<summary>Adds an element in the front</summary>
-   public void EnqueueHead (T value) {
-      if (mCount == mItems.Length) Resize ();
-      mHead = (mHead - 1 + mItems.Length) % mItems.Length;
-      mItems[mHead] = value;
-      mCount++;
-   }
+   /// <summary>Adds an element at the head (front) of the deque</summary>
+   public void EnqueueHead (T value) => Enqueue (value, EState.Head);
 
-   /// <summary>Adds an element to the end of the queue</summary>
-   public void EnqueueTail (T value) {
-      if (mCount == mItems.Length) Resize ();
-      int index = (mHead + mCount) % mItems.Length;
-      mItems[index] = value;
-      mCount++;
-   }
+   /// <summary>Adds an element at the tail (end) of the deque</summary>
+   public void EnqueueTail (T value) => Enqueue (value, EState.Tail);
 
    /// <summary>Removes and returns the element at the head</summary>
-   public T DequeueHead () {
-      if (mCount == 0) throw new InvalidOperationException ("Queue is empty");
-      T value = mItems[mHead];
-      mItems[mHead] = default!;
-      mHead = (mHead + 1) % mItems.Length;
-      mCount--;
-      return value;
-   }
+   public T DequeueHead () => Dequeue (EState.Head);
 
    /// <summary>Removes and returns the element at the tail</summary>
-   public T DequeueTail () {
-      if (mCount == 0) throw new InvalidOperationException ("Queue is empty");
-      int index = (mHead + mCount - 1) % mItems.Length;
-      T value = mItems[index];
-      mItems[index] = default!;
-      mCount--;
-      return value;
-   }
+   public T DequeueTail () => Dequeue (EState.Tail);
    #endregion
 
    #region Implementation -------------------------------------------
-   // Creates a larger array and preserves FIFO order
+   // Inserts an element at the specified end of the deque
+   void Enqueue (T value, EState state) {
+      if (mCount == mItems.Length) Resize ();
+      int len = mItems.Length;
+      if (state is EState.Head) {
+         mHead = (mHead - 1 + len) % len;
+         mItems[mHead] = value;
+      } else {
+         mItems[mTail] = value;
+         mTail = (mTail + 1) % len;
+      }
+      mCount++;
+   }
+
+   // Removes and returns an element from the specified end of the deque
+   T Dequeue (EState state) {
+      if (mCount == 0) throw new InvalidOperationException ("Queue is empty");
+      int len = mItems.Length;
+      T value;
+      if (state is EState.Head) {
+         value = mItems[mHead];
+         mItems[mHead] = default!;
+         mHead = (mHead + 1) % len;
+      } else {
+         mTail = (mTail - 1 + len) % len;
+         value = mItems[mTail];
+         mItems[mTail] = default!;
+      }
+      mCount--;
+      return value;
+   }
+
+   // Doubles the capacity, copies the elements in order starting at index 0
    void Resize () {
-      var newItems = new T[mItems.Length * 2];
+      int len = mItems.Length;
+      var newItems = new T[len * 2];
       for (int i = 0; i < mCount; i++)
-         newItems[i] = mItems[(mHead + i) % mItems.Length];
-      mItems = newItems;
-      mHead = 0;
+         newItems[i] = mItems[(mHead + i) % len];
+      (mItems, mHead, mTail) = (newItems, 0, mCount);
    }
    #endregion
 
    #region Private data ---------------------------------------------
    T[] mItems = new T[4];
-   int mHead, mCount;
+   int mHead, mCount, mTail;  // mTail = index of the next free slot at the end
+   #endregion
+
+   #region Enum EState ----------------------------------------------
+   enum EState {
+      Head, Tail
+   }
    #endregion
 }
 #endregion
