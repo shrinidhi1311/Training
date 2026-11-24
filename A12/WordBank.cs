@@ -21,7 +21,7 @@ class WordBank {
    public string GetRandomWord () => mPuzzle[Random.Shared.Next (mPuzzle.Length)];
 
    /// <summary>Returns true if the word is found in the dictionary</summary>
-   public bool IsWord (string word) => mDictionary.Contains (word);
+   public bool Contains (string word) => mDictionary.Contains (word);
    #endregion
 
    #region Implementation -------------------------------------------

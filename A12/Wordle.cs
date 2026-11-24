@@ -51,9 +51,8 @@ class Wordle {
 
    // Submits the typed word: validate, color it, then check for a win or the last try
    void CheckGuess () {
-      if (!mBank.IsWord (mCurrent)) {
+      if (!mBank.Contains (mCurrent)) {
          ShowMessage ($"{mCurrent} is not a valid word", ConsoleColor.Yellow);
-         mCurrent = "";
          return;
       }
       var result = Evaluate (mCurrent);
